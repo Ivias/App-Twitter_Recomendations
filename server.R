@@ -28,26 +28,65 @@ shinyServer(function(input, output, session) {
 
               #Mostramos un aviso de los que puede durar el proceso
               output$textoSalida<-renderText({"Tiempo aprox. proceso 6h.."})
-
+              
+              
+              # try.generadorMatricesTags = function(x)
+              # {
+              #   y = "Problema de conectividad, revisar consola para ver el detalle"
+              #   try_error = tryCatch(generadorMatricesTags(x), error=function(e) e)
+              #   if (!inherits(try_error, "error"))
+              #     y = generadorMatricesTags(x)
+              #   
+              #   print(y)
+              #   
+              #   return(y)
+              # }
+              # 
+              
               #Ejecutamos las instrucciones
+              #listaMatrices<-try.generadorMatricesTags(input$usuarioAnalisis)
               listaMatrices<-generadorMatricesTags(input$usuarioAnalisis)
+         
               matrizBinariaTags<-listaMatrices[[1]]
               saveRDS(matrizBinariaTags,file=paste0("rb_",input$usuarioAnalisis,".RDa"))
 
               matrizRealTags<-listaMatrices[[2]]
               saveRDS(matrizRealTags,file=paste0("r_",input$usuarioAnalisis,".RDa"))
               
+              print("Se han guardado las matrices binaryRatingMatrix y realRatingMatrix en archivos .RDa")
+              
               frameTagsUsuarios<-listaMatrices[[3]]
               saveRDS(frameTagsUsuarios,file=paste0("tagsUsersFrame_",input$usuarioAnalisis,".RDa"))
               
               frameTweets<-listaMatrices[[4]]
-              saveRDS(frameTweets,file=paste0("TweetsUsers_",input$usuarioAnalisis,".RDa"))
+              saveRDS(frameTweets,file=paste0("tweetsUsersFrame_",input$usuarioAnalisis,".RDa"))
+              
+              print("Se han guardado los dataframes user-tweets y user-tags en archivos .RDa")
               
               #Comprobamos si queremos almacenar en MongoDB
               if(input$mongodb=="SI"){
-                mongodbStorageDataFrame(frameTagsUsuarios,"twitter",paste0("tagsUsersFrame_",input$usuarioAnalisis))
-                mongodbStorageDataFrame(frameTweets,"twitter",paste0("TweetsUsers_",input$usuarioAnalisis))
-              }
+                mongodbStorageDataFrame(frameTagsUsuarios,"twitter",paste0("tagsUsersFrame_",substring(input$usuarioAnalisis,2)))
+                mongodbStorageDataFrame(frameTweets,"twitter",paste0("tweetsUsersFrame_",substring(input$usuarioAnalisis,2)))
+                }
+              
+              print("Se han añadido los dataframes user-tweets y user-tags a la BBDD Mongodb, db=twitter")
+              
+              #Añadimos el usuario a la lista desplegable
+              nuevaLista<-addUserToList(input$usuarioAnalisis)
+              
+              #Print de la nueva lista
+              print(nuevaLista)
+              
+              print("Se añade el usuario a la lista de evaluación")
+              
+              #Guardamos la nueva lista
+              saveRDS(nuevaLista,file="lst.usuariosEval.RDa")
+              
+              #Añadimos el usuario a la lista "usuario" para recomendaciones
+              updateSelectInput(session, "usuario",choices = nuevaLista, selected=nuevaLista[length(nuevaLista)])
+              
+              print("Fin del análisis de Hashtags")
+              
           }else if(input$analisisType=="Usuarios"){
 
             #Mostramos un aviso de los que puede durar el proceso
@@ -94,13 +133,20 @@ shinyServer(function(input, output, session) {
       }
     })
     if (input$analisisType=="Hashtags"){
-        output$plot1<-renderPlot({image(matrizBinaria, main = "Dispersión de la Matriz binaria sin afinar")})
-        output$plot2<-renderPlot({image(matrizReal, main = "Dispersión de la Matriz real sin afinar")})
+        output$textoEtiq5<-renderText(usuarioMostrar)
+        output$plot1<-renderPlot({image(matrizBinariaTags, main = "Dispersión de la Matriz binaria sin afinar")})
+        output$textoEtiq6<-renderText(usuarioMostrar)
+        output$plot2<-renderPlot({image(matrizRealTags, main = "Dispersión de la Matriz real sin afinar")})
         output$textoSalida<-renderText(paste0("Se añaden las nuevas ..ratingMatrix (Hashtags) de ",input$usuarioAnalisis,"a la BBDD."))
-    }else  if (input$analisisType=="Usuarios"){
-        output$plot1<-renderPlot({image(matrizBinaria, main = "Dispersión de la Matriz binaria sin afinar")})
+        output$textoExito<-renderText(paste0("Se ha completado la generación de la matriz Hashtags y añadido el usuario ",input$usuarioAnalisis," a la lista. Listo para ejecutar Recomendador"))
+        
+        }else  if (input$analisisType=="Usuarios"){
+        output$textoEtiq5<-renderText(usuarioMostrar)
+        output$plot1<-renderPlot({image(matrizUsers, main = "Dispersión de la Matriz binaria sin afinar")})
         output$textoSalida<-renderText(paste0("Se añade las nueva binaryRatingMatrix (Usuarios) de ",input$usuarioAnalisis,"a la BBDD."))
-    }
+        output$textoExito<-renderText(paste0("Se ha completado la generación de la matriz de Usuarios y añadido el usuario ",input$usuarioAnalisis," a la lista. Listo para ejecutar Recomendador"))
+        
+        }
 
   })
   
@@ -109,7 +155,10 @@ shinyServer(function(input, output, session) {
   observeEvent(input$Action2, {
 
     print (input$algoritmo)
-
+    
+    #Guardamos la entrada del usuario para evitar los mensajes reactivos.
+    usuarioMostrar<-input$usuario
+    
     #Introducimos una barra de progreso
     dat <- data.frame(x = numeric(0), y = numeric(0))
     
@@ -163,30 +212,41 @@ shinyServer(function(input, output, session) {
       if (input$recotipo=="Ambos"){
           output$tabla1<-renderTable({as(rep1,"matrix")})
           output$tabla2<-renderTable({as(rep2,"matrix")})
+          output$textoEtiq5<-renderText(usuarioMostrar)
           output$plot1<-renderPlot({image(matrizTags, main = "Dispersión de la Matriz(Hashtags) afinada")})
+          output$textoEtiq6<-renderText(usuarioMostrar)
           output$plot2<-renderPlot({image(matrizUsers, main = "Dispersión de la Matriz(Usuarios) afinada")})
           output$textoSalida<-renderText("Recomendaciones encontradas.")
-          output$text<-renderText("")
+          output$textoError<-renderText("")
+          output$textoEtiq1<-renderText(usuarioMostrar)
+          output$textoEtiq2<-renderText(usuarioMostrar)
       }else if(input$recotipo=="Hashtags"){
           output$tabla1<-renderTable({as(rep1,"matrix")})
+          output$textoEtiq5<-renderText(usuarioMostrar)
           output$plot1<-renderPlot({image(matrizTags, main = "Dispersión de la Matriz(Hashtags) afinada")})
           output$textoSalida<-renderText("Recomendaciones encontradas.")
-          output$text<-renderText("")
+          output$textoError<-renderText("")
+          output$textoEtiq1<-renderText(usuarioMostrar)
       }else if(input$recotipo=="Usuarios"){
          output$tabla2<-renderTable({as(rep2,"matrix")}) 
+         output$textoEtiq6<-renderText(usuarioMostrar)
          output$plot2<-renderPlot({image(matrizUsers, main = "Dispersión de la Matriz(Usuarios) afinada")})
          output$textoSalida<-renderText("Recomendaciones encontradas.")
-         output$text<-renderText("")
+         output$textoError<-renderText("")
+         output$textoEtiq2<-renderText(usuarioMostrar)
          }
       }else{
          
-         output$text<-renderText("La opción de algoritmo <TODOS> sólo se usa para evaluación, seleccione otro algoritmo.")
+         output$textoError<-renderText("La opción de algoritmo <TODOS> sólo se usa para evaluación, seleccione otro algoritmo.")
         
       }
     })
     
   observeEvent(input$Action3, {
     print (input$algoritmo)
+    
+    #Guardamos la entrada del usuario para evitar los mensajes reactivos.
+    usuarioMostrar<-input$usuario
     
     #Introducimos una barra de progreso
     dat <- data.frame(x = numeric(0), y = numeric(0))
@@ -225,6 +285,7 @@ shinyServer(function(input, output, session) {
         title("Precision/recall - Hashtags")
       output$textoSalida<-renderText("Gráficas de evaluación mostradas.")})
       output$text<-renderText("")
+      output$textoEtiq3<-renderText(usuarioMostrar)
     
     }else if(input$recotipo=="Usuarios"){
       output$plot5<-renderPlot({plot(evaluacionUsers, annotate = 1, legend = "bottomright")
@@ -233,6 +294,7 @@ shinyServer(function(input, output, session) {
         title("Precision/recall - Users")
         output$textoSalida<-renderText("Gráficas de evaluación mostradas.")})
         output$text<-renderText("")
+        output$textoEtiq4<-renderText(usuarioMostrar)
     }else if(input$recotipo=="Ambos"){
       output$plot3<-renderPlot({plot(evaluacionTags, annotate = 1, legend = "bottomright")
         title("ROC curve - Hashtags")})
@@ -243,7 +305,9 @@ shinyServer(function(input, output, session) {
       output$plot6<-renderPlot({plot(evaluacionUsers, "prec/rec", ylim = c(0,1), annotate = 1, legend = "topright")
         title("Precision/recall - Users")
         output$textoSalida<-renderText("Gráficas de evaluación mostradas.")})
-      output$text<-renderText("")
+      output$textoError<-renderText("")
+      output$textoEtiq3<-renderText(usuarioMostrar)
+      output$textoEtiq4<-renderText(usuarioMostrar)
     }
   })
   

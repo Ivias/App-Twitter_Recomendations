@@ -14,7 +14,8 @@ library(shinyjs)
 library(V8) #Requerida por shinyjs
 library(mongolite)
 
-setwd("C:/users/HOME/Documents/TFM_BigData/")
+setwd("C:/users/HOME/Documents/R/TFM_BigData/")
+
 
 #Cargamos la librería de funciones.
 source("Funciones_matrizBase.R")

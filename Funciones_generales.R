@@ -60,14 +60,15 @@ extractMentions = function(vec){
   return(df)
 }
 
-#Creamos la tabla para trabajar con todos los users y hastags for(i in 1:nrow(mentions)) {
-tabla.usuariostags <- function(mentions, df.tagsUser1, df.tweetsUser1){
+#Creamos el dataframe users-hashtags base de la información
+generarFrameUsuariosTags <- function(mentions, df.tagsUser1, df.tweetsUser1){
   df.tagsUsers<-df.tagsUser1
   df.tweetsUsers<-df.tweetsUser1
-  #Comenzamos en 2 pues el usuario1 ya est? mapeado
-  for(i in 3:10) { #nrow(mentions)
+  #Comenzamos en 2 pues el usuario1 ya está mapeado
+
+  for(i in 2:3) { #nrow(mentions)..aprox 120 3.5h
     if(i!=2){Sys.sleep(90)}
-    print(as.character(mentions[[i,"users"]]))
+    print(paste0(i,",",as.character(mentions[[i,"users"]])))
     tml <- userTimeline(mentions[[i,"users"]], n = 1000,includeRts=TRUE)#antes era 3200
     if( length(tml) > 1 ) {
       tml <- twListToDF(tml)
@@ -122,84 +123,7 @@ limpiarNoHash<-function(dataframe){
   return(dataframe)
 }
 
-buscarTagSimilares<-function(frameFinal){
-  frame<-frameFinal
-  vectorControl<-c() 
-  for (s in 351:391){
-    #nrow(frame)
-    
-    abuscar<-as.character(frame$tag[s])
-    #Comprobamos que no se ha buscado antes
-    #if (match(abuscar,vectorControl)<1){
-    vectorControl<-append(vectorControl, abuscar)
-    print(abuscar)
-    print(s)
-    busca <- searchTwitter(abuscar, n = 1000)
-    if (length(busca) > 0){
-      busca.df <- twListToDF(busca)
-      busca.tweets <-busca.df$text
-      print(length(busca.tweets))
-      #obtenemos los hashses
-      busca.hashes<-extracTags(busca.tweets)
-      if (length(busca.hashes)>0){
-        if (nrow(busca.hashes)>1){
-          busca.hashes<-limpiarNoHash(busca.hashes)
-          columnas<-as.vector(busca.hashes$tag)
-          if (length(columnas)>1){
-            for (i in 2:length(columnas)){
-              resultados<-frame[frame$tag==columnas[i],]
-              longitud<-nrow(frame[frame$tag==columnas[i],])
-              #print(i)
-              if(longitud>0) {
-                #iniciamos el contador para controlar inserciones en la 2? parte
-                contador=0
-                for (j in 1:longitud){
-                  nombre1<-resultados[j,4]
-                  freq1<-resultados[j,2]
-                  tag1<-as.character(resultados[j,1])
-                  nota1<-resultados[j,3]
-                  usuariocomparado<-resultados$usuario[j]
-                  #Comprobamos que el usuario no tiene ya el hashtag, para no duplicarlo (#machismomata)
-                  if (nrow(frameFinal[frameFinal$usuario==usuariocomparado & frameFinal$tag==abuscar,]) == 0){
-                    #hay que mirar lo de la freq1
-                    frameFinal[nrow(frameFinal)+1,] <- c(abuscar, freq1, nota1, nombre1, 1)
-                  }
-                  contador=contador+1
-                  
-                  #ahora al contrario
-                  if (!contador>1){
-                    #Scamos un vector con todos los que tienen #machismomata
-                    resultados2<-frame[frame$tag==abuscar,]
-                    longitud2<-nrow(frame[frame$tag==abuscar,])
-                    for (n in 1:longitud2){
-                      nombre2<-resultados2[n,4]
-                      nota2<-resultados2[n,3]
-                      #freq2<-as.numeric(resultados2[n,2])
-                      #Lo metemos en todos los usuarios menos en aqu?l que ya lo ten?a
-                      
-                      if (resultados2$usuario[n] != nombre1){
-                        #Comprobamos que el usuario no lo tiene #niunamenos
-                        if (nrow(frameFinal[frameFinal$usuario==nombre2 & frameFinal$tag==tag1,]) == 0){
-                          frameFinal[nrow(frameFinal)+1,] <- c(tag1, freq1, nota2, nombre2, 1)
-                        }
-                      }
-                    }
-                  }
-                }
-                
-              }
-              
-            }
-          }  
-        }
-      }
-    }
-    
-    #}
-  }#Devolvemos al finalizar el for
-  return(frameFinal)
-  
-}
+
 
 eliminarNoASCII<-function(vector){
   # convert string to vector of words
