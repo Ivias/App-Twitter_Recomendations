@@ -1,9 +1,5 @@
 source("globalTFM.R")
 
-login()
-
-
-
 shinyServer(function(input, output, session) {
   
   observeEvent(input$Action1, {
