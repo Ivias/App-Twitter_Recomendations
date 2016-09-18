@@ -191,7 +191,9 @@ formarTabla<-function(vList,vType){
 
 recomenUsersdb<-function(vUser, vAlgorithm, vN){
   
+  
   fileName<-paste0("rb_follow_",vUser,".RDa")
+
   data<-readRDS(fileName)
   
   #Eliminamos el caracter del usuario para poder trabajar con la matriz
@@ -225,6 +227,7 @@ recomenUsersdb<-function(vUser, vAlgorithm, vN){
   lista<-list(recommendations,data)
   #Devolvemos las recomendaciones
   return(lista)
+  
 }
 
 
@@ -237,15 +240,8 @@ afinarMatriz<-function(vMatrix,vMinRow,vMinColum){
   return(vMatrix)
 }
 
-addUserToList<-function(vUser){
-  listaIn<-readRDS(file="lst.usuariosEval.RDa")
-  listaOut<-c(lista,vUser)
-  saveRDS(listaOut,file="lst.usuariosEval.RDa")
+addUserToList<-function(vListaIn, vUser){
+  listaOut<-c(vListaIn,vUser)
   return(listaOut)
 }
 
-
-cargaListaUsers<-function(vFile){
-  lista<-readRDS(file=vFile)
-  return(lista)
-}

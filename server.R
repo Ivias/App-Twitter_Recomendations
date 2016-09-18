@@ -1,11 +1,15 @@
 source("globalTFM.R")
 
+
 shinyServer(function(input, output, session) {
   
   observeEvent(input$Action1, {
     
     print (input$usuarioAnalisis)
-
+    
+    #Guardamos la entrada del usuario de analisis para evitar los mensajes reactivos.
+    usuarioMostrar<-input$usuarioAnalisis
+    
     #Introducimos una barra de progreso
     dat <- data.frame(x = numeric(0), y = numeric(0))
 
@@ -42,75 +46,74 @@ shinyServer(function(input, output, session) {
               #Ejecutamos las instrucciones
               #listaMatrices<-try.generadorMatricesTags(input$usuarioAnalisis)
               listaMatrices<-generadorMatricesTags(input$usuarioAnalisis)
-         
+
               matrizBinariaTags<-listaMatrices[[1]]
               saveRDS(matrizBinariaTags,file=paste0("rb_",input$usuarioAnalisis,".RDa"))
 
               matrizRealTags<-listaMatrices[[2]]
               saveRDS(matrizRealTags,file=paste0("r_",input$usuarioAnalisis,".RDa"))
-              
+
               print("Se han guardado las matrices binaryRatingMatrix y realRatingMatrix en archivos .RDa")
-              
+
               frameTagsUsuarios<-listaMatrices[[3]]
               saveRDS(frameTagsUsuarios,file=paste0("tagsUsersFrame_",input$usuarioAnalisis,".RDa"))
-              
+
               frameTweets<-listaMatrices[[4]]
               saveRDS(frameTweets,file=paste0("tweetsUsersFrame_",input$usuarioAnalisis,".RDa"))
-              
+
               print("Se han guardado los dataframes user-tweets y user-tags en archivos .RDa")
-              
+
               #Comprobamos si queremos almacenar en MongoDB
               if(input$mongodb=="SI"){
                 mongodbStorageDataFrame(frameTagsUsuarios,"twitter",paste0("tagsUsersFrame_",substring(input$usuarioAnalisis,2)))
                 mongodbStorageDataFrame(frameTweets,"twitter",paste0("tweetsUsersFrame_",substring(input$usuarioAnalisis,2)))
                 }
-              
+
               print("Se han añadido los dataframes user-tweets y user-tags a la BBDD Mongodb, db=twitter")
-              
+
               #Añadimos el usuario a la lista desplegable
-              nuevaLista<-addUserToList(input$usuarioAnalisis)
-              
+              listaIn<-readRDS(file="lst.usuariosEval.RDa")
+              nuevaLista<-addUserToList(listaIn,input$usuarioAnalisis)
+              saveRDS(nuevaLista,file="lst.usuariosEval.RDa")
+
               #Print de la nueva lista
               print(nuevaLista)
-              
+
               print("Se añade el usuario a la lista de evaluación")
-              
-              #Guardamos la nueva lista
-              saveRDS(nuevaLista,file="lst.usuariosEval.RDa")
-              
+
               #Añadimos el usuario a la lista "usuario" para recomendaciones
               updateSelectInput(session, "usuario",choices = nuevaLista, selected=nuevaLista[length(nuevaLista)])
-              
+
               print("Fin del análisis de Hashtags")
-              
+
           }else if(input$analisisType=="Usuarios"){
 
             #Mostramos un aviso de los que puede durar el proceso
             output$textoSalida<-renderText({"Tiempo aprox. proceso 6h.."})
 
-            
+
               #Ejecutamos las instrucciones
               listaMatrizUsers<-generadorMatricesUsers(input$usuarioAnalisis)
-              
+
               #Extraemos la matriz usuarios~usuarios
                matrizUsers<-listaMatrizUsers[[1]]
               #Guardamos la matriz obtenida
               saveRDS(matrizUsers,file=paste0("rb_follow_",input$usuarioAnalisis,".RDa"))
-              
+
               #Guardamos el dataframe base de análisis
               frameUsersUsuarios<-listaMatrizUsers[[2]]
               saveRDS(frameUsersUsuarios,file=paste0("followeesFrame_",input$usuarioAnalisis,".RDa"))
-              
+
               #Añadimos el usuario a la lista desplegable
-              nuevaLista<-addUserToList(input$usuarioAnalisis)
+              listaIn<-readRDS(file="lst.usuariosEval.RDa")
+              nuevaLista<-addUserToList(listaIn,input$usuarioAnalisis)
+              saveRDS(nuevaLista,file="lst.usuariosEval.RDa")
               
               #Print de la nueva lista
               print(nuevaLista)
               
               print("Se añade el usuario para lista de evaluación")
               
-              #Guardamos la nueva lista
-              saveRDS(nuevaLista,file="lst.usuariosEval.RDa")
               
               #Añadimos el usuario a la lista "usuario" para recomendaciones
               updateSelectInput(session, "usuario",choices = nuevaLista, selected=nuevaLista[length(nuevaLista)])

@@ -9,7 +9,7 @@ login<-function(){
   
   access_secret <- "Clrqm1dSE7lYMDaSpgP71cjzhHmQGzmTJzhdAWXnMlCaW"
   
-  #options(httr_oauth_cache=T)
+  options(httr_oauth_cache=T)
   
   # keep this order of arguments
   setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
@@ -66,7 +66,7 @@ generarFrameUsuariosTags <- function(mentions, df.tagsUser1, df.tweetsUser1){
   df.tweetsUsers<-df.tweetsUser1
   #Comenzamos en 2 pues el usuario1 ya está mapeado
 
-  for(i in 2:3) { #nrow(mentions)..aprox 120 3.5h
+  for(i in 2:nrow(mentions)) { #nrow(mentions)..aprox 120 3.5h
     if(i!=2){Sys.sleep(90)}
     print(paste0(i,",",as.character(mentions[[i,"users"]])))
     tml <- userTimeline(mentions[[i,"users"]], n = 1000,includeRts=TRUE)#antes era 3200
@@ -77,11 +77,10 @@ generarFrameUsuariosTags <- function(mentions, df.tagsUser1, df.tweetsUser1){
       df.tweets$user<-mentions[[i,"users"]]
       df.tweetsUsers <- rbind(df.tweetsUsers,df.tweets)
       
-      #Almacenamos la informaci?n de los tweets
+      #Almacenamos la información de los tweets
       saveRDS(df.tweetsUsers,file=paste0("Tweets_frame_",mentions[[1,"users"]],".RDa"))
       
-      #vamos almacenando los tweets en el vector storageTweets
-      #storageTweets<-c(storageTweets,tweets)
+      #Extraemos los hashtags de los tweets
       frameObtenido <- extracTags(tweets)
       if (!is.null(frameObtenido)){
         frameObtenido$usuario <- as.character(mentions[i,"users"])

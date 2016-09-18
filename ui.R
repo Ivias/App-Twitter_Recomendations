@@ -26,7 +26,7 @@ shinyUI(fluidPage(
   
   fluidRow(
     column(3, wellPanel(
-      strong("Usuarios a analizar",style = "font-family: 'times'; font-size:24px"),
+      strong("Usuario a analizar",style = "font-family: 'times'; font-size:24px"),
       br(),
       br(),
       textInput("usuarioAnalisis", "Usuario", "@salvados"),
@@ -39,7 +39,7 @@ shinyUI(fluidPage(
       br()
       
     ),wellPanel(
-      strong("Evaluación de resultados",style = "font-family: 'times'; font-size:24px"),
+      strong("Recomendaciones y Evaluación",style = "font-family: 'times'; font-size:24px"),
       br(),
       br(),
       selectInput("usuario", label="Usuario de estudio", 
@@ -49,7 +49,7 @@ shinyUI(fluidPage(
       selectInput("tipoMatriz", label="Tipo de matriz", 
                   choices=list("Binaria"="Binaria","Real (Hashtags)"="Real"),selected="Binaria"),
       selectInput("algoritmo", label="Algoritmo", 
-                  choices=list("POPULAR"="POPULAR","UBCF"="UBCF","IBCF"="IBCF","TODOS (Evaluacion)"="TODOS"),selected="POPULAR"),
+                  choices=list("POPULAR"="POPULAR","UBCF"="UBCF","IBCF"="IBCF","TODOS (Evaluación)"="TODOS"),selected="POPULAR"),
       sliderInput("n","Número de recomendaciones", value = 10, min = 1, max = 20),
       actionButton("Action2","Recomendaciones"),
       br(),

@@ -15,6 +15,7 @@ library(V8) #Requerida por shinyjs
 library(mongolite)
 
 
+
 #Cargamos las librerías de funciones.
 source("Funciones_matrizBase.R")
 source("Funciones_generales.R")
@@ -28,5 +29,7 @@ setwd("C:/users/HOME/Documents/R/TFM_BigData/")
 #Login de la App en Twitter
 login()
 
-#Iniciamos la lista de usuarios alamacenados en BBDD
-listaUsuariosEval<-cargaListaUsers("lst.usuariosEval.RDa")
+
+
+
+
