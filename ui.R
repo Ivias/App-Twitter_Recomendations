@@ -1,6 +1,9 @@
+#Cargamos la lista de usuarios de evaluación
+listaUsuariosEval<-readRDS("lst.usuariosEval.RDa")
+#saveRDS(listaUsuariosEval[1:2],file="lst.usuariosEval.RDa")
 
 shinyUI(fluidPage(
-  
+
   #Añadimos estilos CSS a algunos cuadros tipo textOutput
   tags$style(type='text/css', '#textoError {background-color: white; color: red;}'),
   tags$style(type='text/css', '#textoExito {background-color: white; color: green;}'),
@@ -12,7 +15,7 @@ shinyUI(fluidPage(
   tags$style(type='text/css', '#textoEtiq6 {background-color: rgb(238,238,238); color: black; text-align: center;font: 18px arial, sans-serif;}'),
   
   #tags$style(type='text/css', '#text {background-color: rgba(255,255,0,0.40); color: red;}'),
-  titlePanel("Twitter - Sistema Recomendador"),
+  titlePanel("Twitter - Sistema de Recomendaciones"),
   navbarPage(title = "TFM - Big Data and Visual Analytics "),
   
   #Usamos javascript mediante el package shinyjs para refrescar la app
@@ -29,7 +32,7 @@ shinyUI(fluidPage(
       strong("Usuario a analizar",style = "font-family: 'times'; font-size:24px"),
       br(),
       br(),
-      textInput("usuarioAnalisis", "Usuario", "@salvados"),
+      textInput("usuarioAnalisis", "Usuario", "@salvadostv"),
       selectInput("analisisType", label="Tipo de recomendación", 
                   choices=list("Hashtags"="Hashtags","Usuarios"="Usuarios"),selected="Hashtags"),
       selectInput("mongodb", label="Almacenar dataframe en Mongodb", 

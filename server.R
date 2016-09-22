@@ -278,7 +278,7 @@ shinyServer(function(input, output, session) {
     })
     #Presentamos las graficas
     if(input$recotipo=="Hashtags"){
-      output$plot3<-renderPlot({plot(evaluacionTags, annotate = 1, legend = "bottomright")
+      output$plot3<-renderPlot({plot(evaluacionTags, annotate = 1, legend = "topright")
         title("ROC curve - Hashtags")})
       output$plot4<-renderPlot({plot(evaluacionTags, "prec/rec", ylim = c(0,1), annotate = 1, legend = "topright")
         title("Precision/recall - Hashtags")
@@ -295,11 +295,11 @@ shinyServer(function(input, output, session) {
         output$text<-renderText("")
         output$textoEtiq4<-renderText(usuarioMostrar)
     }else if(input$recotipo=="Ambos"){
-      output$plot3<-renderPlot({plot(evaluacionTags, annotate = 1, legend = "bottomright")
+      output$plot3<-renderPlot({plot(evaluacionTags, annotate = 1, legend = "topright")
         title("ROC curve - Hashtags")})
       output$plot4<-renderPlot({plot(evaluacionTags, "prec/rec", ylim = c(0,1), annotate = 1, legend = "topright")
         title("Precision/recall - Hashtags")})
-      output$plot5<-renderPlot({plot(evaluacionUsers, annotate = 1, legend = "bottomright")
+      output$plot5<-renderPlot({plot(evaluacionUsers, annotate = 1, legend = "topright")
         title("ROC curve - Users")})
       output$plot6<-renderPlot({plot(evaluacionUsers, "prec/rec", ylim = c(0,1), annotate = 1, legend = "topright")
         title("Precision/recall - Users")
