@@ -1,29 +1,32 @@
 require(mongolite)
 
+#Función que almacena en MogoDB un vector
 mongodbStorageVector<-function(vector,dbase,coleccion,usuario){
  
   df<-data.frame(vector)
   df$user<-usuario
 
-  #iniciamos la conexi?n con Mongodb
+  #iniciamos la conexión con Mongodb
   m <- mongo(collection = coleccion, db=dbase)
   #Insertamos los datos
   m$insert(df)
   print("Insert OK")
 }
 
+#Función que almacena en MogoDB un dataframe
 mongodbStorageDataFrame<-function(data, dbase, coleccion){
   
-  #iniciamos la conexi?n con Mongodb
+  #iniciamos la conexión con Mongodb
   m <- mongo(collection = coleccion, db=dbase)
   #Insertamos los datos
   m$insert(data)
   print("Insert OK")
 }
 
+#Función que recupera de MogoDB un dataframe con la consulta
 mongodbGetData<-function(dbase,coleccion,usuario){
 
-  #iniciamos la conexi?n a Mongodb
+  #iniciamos la conexión a Mongodb
   m <- mongo(collection = coleccion, db=dbase)
   #Insertamos los datos
   #Preparamos la query con la variable usuario
@@ -38,7 +41,3 @@ mongodbGetData<-function(dbase,coleccion,usuario){
   #Devolvemos los datos de la consulta en un dataframe
   return(out)
 }
-
-#mongodbStorageData(tweet,"twitter","tweets","jordiEvole")
-
-#tweets_jordi<-mongodbGetData("twitter","tweets","jordiEvole")

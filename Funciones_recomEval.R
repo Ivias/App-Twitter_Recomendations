@@ -1,5 +1,5 @@
 
-
+#Función de recomendación de hashtags
 recomenTagsdb<-function(vUser, vType, vAlgorithm, vN){
   
   if (vType=="Binaria"){
@@ -39,7 +39,7 @@ recomenTagsdb<-function(vUser, vType, vAlgorithm, vN){
 }
 
 
-
+#Función que evalua los resultados de la recomendación de hashtags
 evalueAlgorithmsTagsdb<-function(vUser, vType, vK, vAlgorithm){
   if (vType=="Binaria"){
     
@@ -96,6 +96,7 @@ evalueAlgorithmsTagsdb<-function(vUser, vType, vK, vAlgorithm){
     #Reducimos la dispersión de la matriz
     r<-afinarMatriz(data,5,2)
     
+    #Creamos una lista con los modelos a evaluar para la matriz real
     models_to_evaluate <- list(  
       random = list(name = "RANDOM", param=NULL),
       PUPULAR = list(name = "POPULAR", param = NULL),
@@ -110,15 +111,16 @@ evalueAlgorithmsTagsdb<-function(vUser, vType, vK, vAlgorithm){
     eval_sets <- evaluationScheme(data = r, method = "cross-validation", k = vK, given = 4, goodRating=3)
     
   }
-  
+  #Número de recomendaciones a emitir
   n_recommendations <- c(1, 3, 5, 10, 15, 20)
   
+  #Lista de resultados de las evaluaciones
   list_results <- evaluate(x = eval_sets, method = models_to_evaluate, n = n_recommendations)
   return(list_results)
 }
 
 
-
+#Función que evalua los resultados de la recomendación de ussuarios
 evalueAlgorithmsUsersdb<-function(vUser, vK, vAlgorithm){
   
   
@@ -165,16 +167,15 @@ evalueAlgorithmsUsersdb<-function(vUser, vK, vAlgorithm){
   #Definimos el esquema de evaluación
   eval_sets <- evaluationScheme(data = rb, method = "cross-validation", k = vK, given = 10)
   
-  
-  
-  
-  
+  #Definimos el número de recomendaciones
   n_recommendations <- c(1, 3, 5, 10, 15, 20)
   
+  #Lista con los resultados de la evaluación de los algoritmos
   list_results <- evaluate(x = eval_sets, method = models_to_evaluate, n = n_recommendations)
   return(list_results)
 }
 
+#Función que forma una tabla para mostrar gráficamente una lista
 formarTabla<-function(vList,vType){
   
   columna<-unlist(as(vList,"list"))
@@ -188,7 +189,7 @@ formarTabla<-function(vList,vType){
   return(frame)
 }
 
-
+#Función que emite recomendaciones de usuarios
 recomenUsersdb<-function(vUser, vAlgorithm, vN){
   
   
@@ -230,7 +231,7 @@ recomenUsersdb<-function(vUser, vAlgorithm, vN){
   
 }
 
-
+#Función que reduce los valores de dispersión de una matriz mediante afinamiento
 afinarMatriz<-function(vMatrix,vMinRow,vMinColum){
   #matriz<- vMatrix[rowCounts(vMatrix)>vMinRow,colCounts(vMatrix)>vMinColum]
   
@@ -240,6 +241,7 @@ afinarMatriz<-function(vMatrix,vMinRow,vMinColum){
   return(vMatrix)
 }
 
+#Función que añade un usuario analizado a la lista para recomendar y evaluar
 addUserToList<-function(vListaIn, vUser){
   listaOut<-c(vListaIn,vUser)
   return(listaOut)

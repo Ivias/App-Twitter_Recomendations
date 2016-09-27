@@ -1,6 +1,7 @@
+#Cargamos las funciones principales
 source("globalTFM.R")
 
-
+#Iniciamos el sevidor
 shinyServer(function(input, output, session) {
   
   observeEvent(input$Action1, {
@@ -14,7 +15,7 @@ shinyServer(function(input, output, session) {
     dat <- data.frame(x = numeric(0), y = numeric(0))
 
     withProgress(message = 'Procesando', value = 0, {
-      # Number of times we'll go through the loop
+      # Loop
       n <- 100
 
       for (i in 1:n) {
@@ -131,6 +132,7 @@ shinyServer(function(input, output, session) {
         Sys.sleep(0.02)
       }
     })
+    #Presentamos las gráficas
     if (input$analisisType=="Hashtags"){
         output$textoEtiq5<-renderText(usuarioMostrar)
         output$plot1<-renderPlot({image(matrizBinariaTags, main = "Dispersión de la Matriz binaria sin afinar")})
@@ -162,7 +164,7 @@ shinyServer(function(input, output, session) {
     dat <- data.frame(x = numeric(0), y = numeric(0))
     
     withProgress(message = 'Procesando', value = 0, {
-      # Number of times we'll go through the loop
+      # Loop
       n <- 100
       
       for (i in 1:n) {
@@ -206,7 +208,7 @@ shinyServer(function(input, output, session) {
       }
       })
     
-    #Presentamos las graficas
+    #Presentamos las gráficas
     if (input$algoritmo!="TODOS"){
       if (input$recotipo=="Ambos"){
           output$tabla1<-renderTable({as(rep1,"matrix")})
@@ -251,7 +253,7 @@ shinyServer(function(input, output, session) {
     dat <- data.frame(x = numeric(0), y = numeric(0))
     
     withProgress(message = 'Procesando', value = 0, {
-      # Number of times we'll go through the loop
+      # Loop
       n <- 100
       
       for (i in 1:n) {
@@ -276,7 +278,7 @@ shinyServer(function(input, output, session) {
         Sys.sleep(0.02)
       }
     })
-    #Presentamos las graficas
+    #Presentamos las gráficas
     if(input$recotipo=="Hashtags"){
       output$plot3<-renderPlot({plot(evaluacionTags, annotate = 1, legend = "topright")
         title("ROC curve - Hashtags")})
@@ -320,7 +322,7 @@ shinyServer(function(input, output, session) {
    shinyjs::js$refresh()
   })
   
-  #Crerramos App Shiny
+  #Cerramos App Shiny
   })
   
 

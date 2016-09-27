@@ -1,16 +1,16 @@
 
 
-
+#Función que genera una matriz a partir de los datos analizados de un usuario de Twitter
 generadorMatricesTags<-function(vUser){
   
-  #---1.	Recogida de hasta un l?mite impuesto por la API de 3200 tweets de un usuario.
+  #---1.	Recogida de hasta un límite impuesto por la API de 3200 tweets de un usuario.
   
   usuario<-vUser #e.j: @jordievole
   
-  #Obtenemos la informaci?n del usuario
+  #Obtenemos la información del usuario
   tw <- userTimeline(vUser, n = 3200,includeRts=TRUE)
   
-  #Pasamos la informaci?n a un dataframe para poder trabajar
+  #Pasamos la información a un dataframe para poder trabajar
   tw <- twListToDF(tw)
   
   #Obtnemos los tweets del usuario almacenados en un vector
@@ -19,10 +19,10 @@ generadorMatricesTags<-function(vUser){
   #Creamos el dataframe con los tweets del primer usuario
   df.tweetsUser1<-data.frame(tweets)
   
-  #A?adimos una columna con el nombre del usuario
+  #Añadimos una columna con el nombre del usuario
   df.tweetsUser1$user<-usuario
   
-  #---2.	Extracci?n de menciones de los tweets
+  #---2.	Extracción de menciones de los tweets
   
   #Obtenemos las menciones del usuario llamando a la funcion extract.mentions(vec)
   mentions<-extractMentions(tweets)
@@ -37,31 +37,31 @@ generadorMatricesTags<-function(vUser){
   mentions<-mentions[mentions$freq > 10,]
   mentions<-data.frame(users=mentions[,1])
   
-  #Obtenemos la lista de tags en los tweets llamando a la funci?n extracTags
+  #Obtenemos la lista de tags en los tweets llamando a la función extracTags
   tags<-extracTags(tweets)
   
-  #Nos quedamos ?nicamente con aquellos tags que tienen una freq. >10 (parametrizable)
+  #Nos quedamos únicamente con aquellos tags que tienen una freq. >10 (parametrizable)
   tags<-tags[tags$freq > 10,]
   
-  #Reordenamos indices
+  #Reordenamos índices
   rownames(tags) <- 1:nrow(tags)
   
   #----------Paso 3 Creamos un dataframe para trabajar -------------->
   
-  #definimos un dataframe copiando hases
+  #definimos un dataframe de usuario copiando tags
   tagsUsuario1 <-tags
   
-  #A?adimos una columna con las calificaciones de los tags
+  #Añadimos una columna con las calificaciones de los hashtags
   tagsUsuario1 <-addNotas(tagsUsuario1)
   
   
-  #a?adimos una columna usuario con el nombre del usuario objeto (parametrizable)
+  #Añadimos una columna usuario con el nombre del usuario objeto
   tagsUsuario1$usuario <- usuario
   
-  #A?adimos la columna tick inicializ?ndola a 1
+  #Añadimos la columna tick inicializándola a 1
   tagsUsuario1$tick <- 1
   
-  #<--------------Paso 5.1 Intentamos meter algo m?s de 20 usuarios-------->
+  #<--------------Paso 5.1 Intentamos incluir algo más de 20 usuarios-------->
   
   #Datos del usuario
   user<-getUser(vUser)
@@ -69,7 +69,7 @@ generadorMatricesTags<-function(vUser){
   #Obtenemos los followees
   friends<-user$getFriends()
   
-  #Pasamos a un dataframe la informaci?n
+  #Pasamos a un dataframe la información
   friends<-twListToDF(friends)
   
   #Ordenamos por popularidad
@@ -78,13 +78,13 @@ generadorMatricesTags<-function(vUser){
   #Escogemos los 100 más populares
   friends<-data.frame(friends[1:100,c("screenName")])
   
-  #nombramos la columna para que sea compatible con las dataframe mentions
+  #Nombramos la columna para que sea compatible con el dataframe mentions
   colnames(friends)<-"users"
 
-  #A?adimos @ a los nombres de los users
+  #Añadimos @ a los nombres de los users
   friends["users"]<-sapply(friends["users"], function(x) paste0("@",friends$users))
   
-  #A?adimos este dataframe a mentions
+  #Añadimos este dataframe a mentions
   finalUsers <- rbind(mentions,friends)
 
   print ("Hemos creado la lista mentions + friends")
@@ -95,15 +95,15 @@ generadorMatricesTags<-function(vUser){
   #Reordenamos los indices
   rownames(finalUsers) <- 1:nrow(finalUsers)
   
-  #----------Paso 4 Creamos un finalFrame con los tags del usuario + los de las menciones -------------->
+  #----------Paso 4 Creamos un finalFrame con los hashtags del usuario + los del dataframe mentions -------------->
   
-  print ("Comienza la ejecuci?n de la funcion: tabla.usuariostags()")
+  print ("Comienza la ejecución de la función: tabla.usuariostags()")
   
   #Por cada usuario recogemos sus 20 tags más frecuentes y sus tweets
   #Devuelve lista con el dataframe y un vector de tweets
   listado <- generarFrameUsuariosTags(finalUsers,tagsUsuario1, df.tweetsUser1 )
   
-  print ("Terminada la ejecuci?n de la funci?n: tabla.usuariostags()")
+  print ("Terminada la ejecución de la función: tabla.usuariostags()")
   
   #Recogemos el dataframe tags~users
   tagsUsuarios<-listado[[1]]
@@ -126,7 +126,7 @@ generadorMatricesTags<-function(vUser){
   #Reorganizamos los indices del dataframe tagsUsuarios
   rownames(tagsUsuarios) <- 1:nrow(tagsUsuarios)
   
-  #<--------------Paso 6 Creamos la matrizFinal, que ser? usada en el filtrado colaborativo.-------->
+  #<--------------Paso 6 Creamos la matrizFinal, que será usada en el filtrado colaborativo.-------->
   
   #Eliminamos duplicidades
   tagsUsuarios<-unique(tagsUsuarios)
@@ -147,10 +147,10 @@ generadorMatricesTags<-function(vUser){
   #Guardamos los nombres de los usuarios de la matriz binaria
   usuariosBinaria<-rownames(matrizBinaria)
   
-  #A partir de la segunda columna guardamos una nueva matriz real con valores num?ricos
+  #A partir de la segunda columna guardamos una nueva matriz real con valores numéricos
   matrizReal<-apply(matrizReal[,1:ncol(matrizReal)], 2, as.numeric)
   
-  #A partir de la segunda columna guardamos una nueva matriz binaria con valores num?ricos
+  #A partir de la segunda columna guardamos una nueva matriz binaria con valores numéricos
   matrizBinaria<-apply(matrizBinaria[,1:ncol(matrizBinaria)], 2, as.numeric)
   
   #Incorporamos los usuarios antes guardados, como los nombres de las filas
@@ -178,13 +178,6 @@ generadorMatricesTags<-function(vUser){
   
 }
 
-addNotas<-function(frame){
-  #A?adimos una columna de notas
-  maximo<-max(frame$freq)
-  nota<-apply(frame, 1, function(x) round(as.numeric(x[2])*10/maximo,2))
-  frame$nota<-nota
-  return(frame)
-}
 
 generadorMatricesUsers<-function(vUser){
   
@@ -203,11 +196,11 @@ generadorMatricesUsers<-function(vUser){
   #Reordenamos los indices
   rownames(friends) <- 1:nrow(friends)
   
-  #A?adimos las culumnas con el vUser y un control para generar la matriz final.
+  #Añadimos las culumnas con el vUser y un control para generar la matriz final.
   friends$usuario<-vUser
   friends$tick<-1
   
-  #Nombremos las columnas del dataframe generado
+  #Nombramos las columnas del dataframe generado
   colnames(friends)<-c("followee","followersCount","follower","tick")
   
   #---------Paso 2, por cada uno de los amigos debemos encontrar sus seguidores
@@ -219,12 +212,12 @@ generadorMatricesUsers<-function(vUser){
   
   print ("Completamos buscando los 100-Top followees de cada uno de los followers de la tabla anterior")
   
-  #Para cada seguidor del dataframe buscamos los m?s seguidos
+  #Para cada seguidor del dataframe buscamos los más seguidos
   FrameCompleto<-FolloweeGetFrame(frameSeguidores,vUser)
   
   print (paste0("Guardamos el dataframe generado en FrameRecoUsers_",vUser,"RDa")) 
 
-  #Guardamos la informaci?n generada
+  #Guardamos la información generada
   saveRDS(FrameCompleto,file=paste0("FrameRecoUsers_",vUser,".RDa"))
   
   print("Generamos la matriz binaria")
@@ -235,7 +228,7 @@ generadorMatricesUsers<-function(vUser){
   #Guardamos los nombres de los usuarios
   usuarios<-rownames(matrizFollow)
   
-  #A partir de la segunda columna guardamos una nueva matriz con valores num?ricos
+  #A partir de la segunda columna guardamos una nueva matriz con valores numéricos
   matrizFollow<-apply(matrizFollow[,1:ncol(matrizFollow)], 2, as.numeric)
   
   #Incorporamos los usuarios antes gurdados como los nombres de fila
@@ -243,7 +236,7 @@ generadorMatricesUsers<-function(vUser){
   
   print ("Finalmente generamos la matriz binaryRatingMatrix")
   
-  #Se genera la matriz binaryRatingMatrix que se usa como fuente base de informaci?n
+  #Se genera la matriz binaryRatingMatrix que se usa como fuente base de información
   rb_usu = as(matrizFollow,"binaryRatingMatrix")
   
   lista<-list(rb_usu,FrameCompleto)

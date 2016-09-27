@@ -2,6 +2,7 @@
 listaUsuariosEval<-readRDS("lst.usuariosEval.RDa")
 #saveRDS(listaUsuariosEval[1:2],file="lst.usuariosEval.RDa")
 
+#Iniciamos el cliente
 shinyUI(fluidPage(
 
   #Añadimos estilos CSS a algunos cuadros tipo textOutput

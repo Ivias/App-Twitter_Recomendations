@@ -1,4 +1,4 @@
-
+#Función de Login usando la REST APIs de Twitter
 login<-function(){
   
   consumer_key <- "g13r94mxybuWkAQAGoscF21Mh"
@@ -11,12 +11,12 @@ login<-function(){
   
   options(httr_oauth_cache=T)
   
-  # keep this order of arguments
+  # Mantener el orden de argumentos
   setup_twitter_oauth(consumer_key, consumer_secret, access_token, access_secret)
   
 }
 
-#A?n no savemos xq esta funcion funciona mejor q la anterior.
+#Función que extrae los hashtags de los tweets
 extracTags= function(vec){
   
   hash.pattern = "#[[:alpha:]]+"
@@ -42,7 +42,7 @@ extracTags= function(vec){
   }
 }
 
-#Para extraer las menciones
+#Función que extrae las menciones de los hashtags
 extractMentions = function(vec){
   
   mention.pattern = "@\\w+"
@@ -52,7 +52,7 @@ extractMentions = function(vec){
   df = regmatches(x = vec[have.mention], m = mention.matches)
   #Pasamos la lista a un dataframe
   df<-data.frame(table(unlist(df)))
-  #A?adimos los nombres a las columnas
+  #Añadimos los nombres a las columnas
   colnames(df) = c("users","freq")
   #Ordenamos por freq.
   df = df[order(df$freq,decreasing = TRUE),]
@@ -64,9 +64,9 @@ extractMentions = function(vec){
 generarFrameUsuariosTags <- function(mentions, df.tagsUser1, df.tweetsUser1){
   df.tagsUsers<-df.tagsUser1
   df.tweetsUsers<-df.tweetsUser1
-  #Comenzamos en 2 pues el usuario1 ya está mapeado
+  #Comenzamos en i=2, pues el usuario1 ya está mapeado
 
-  for(i in 2:nrow(mentions)) { #nrow(mentions)..aprox 120 3.5h
+  for(i in 2:nrow(mentions)) {
     if(i!=2){Sys.sleep(90)}
     print(paste0(i,",",as.character(mentions[[i,"users"]])))
     tml <- userTimeline(mentions[[i,"users"]], n = 1000,includeRts=TRUE)#antes era 3200
@@ -88,18 +88,18 @@ generarFrameUsuariosTags <- function(mentions, df.tagsUser1, df.tweetsUser1){
         
         
         if (class(frameObtenido)=="data.frame"){
-          #Seleccionamos unicamente los primeros 20 hastag
+          #Seleccionamos únicamente los primeros 20 hastag
           frameObtenido<-frameObtenido[1:20, ]
           frameObtenido<-addNotas(frameObtenido)
           df.tagsUsers <- rbind(df.tagsUsers,frameObtenido)
           
-          #Almacenamos la informaci?n de los Tags
+          #Almacenamos la información de los hastags
           saveRDS(df.tagsUsers,file=paste0("Tags_frame_",mentions[[1,"users"]],".RDa"))
           
         }
       }
     }
-    if(i%%6==0){#loginTwitter()
+    if(i%%6==0){
       Sys.sleep(240) 
     }
     
@@ -109,7 +109,7 @@ generarFrameUsuariosTags <- function(mentions, df.tagsUser1, df.tweetsUser1){
 }
 
 limpiarNoHash<-function(dataframe){
-  #Inicia un vector vac?o
+  #Inicia un vector vacío
   quita=c()
   for (i in 1:length(dataframe$tag)){
     if ((substring(dataframe$tag[i],1,1)=="#")==TRUE) {
@@ -123,22 +123,23 @@ limpiarNoHash<-function(dataframe){
 }
 
 
-
+#Función que limpia los tweets de elementos no ASCII
 eliminarNoASCII<-function(vector){
-  # convert string to vector of words
-  dat2 <- unlist(strsplit(storageTweets, split=", "))
-  # find indices of words with non-ASCII characters
+  # Convertimos el string a un vector de palabras
+  dat2 <- unlist(strsplit(vector, split=", "))
+  # Buscamos los índices de las palabras con  carácteres no ASCII
   dat3 <- grep("dat2", iconv(dat2, "latin1", "ASCII", sub="dat2"))
-  # subset original vector of words to exclude words with non-ASCII char
+  # Eliminamos las palabras no ASCII
   dat4 <- dat2[-dat3]
-  # convert vector back to a string
+  # Convertimos el vector optenido en un string
   dat5 <- paste(dat4, collapse = ", ")
   return(dat5)
 }
 
+#Función que añade calificaciones a los hashtags
 addNotas<-function(frame){
   
-  #A?adimos una columna de notas
+  #Añadimos una columna de notas
   maximo<-max(frame$freq)
   nota<-apply(frame, 1, function(x) round(as.numeric(x[2])*10/maximo,2))
   frame$nota<-nota
