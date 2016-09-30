@@ -7,32 +7,36 @@ recomenTagsdb<-function(vUser, vType, vAlgorithm, vN){
   }else{
     fileName<-paste0("r_",vUser,".RDa")
   }
-  data<-readRDS(fileName)
+
+  if (file.exists(fileName)){
+    data<-readRDS(fileName)
+    
+    #Reducimos la dispersión de la matriz
+    data<-afinarMatriz(data,5,2)
+    #usuario<-paste0("@",vUser)
+    
+    pos<-which(rownames(data) ==vUser, arr.ind = T)
+    lim<-nrow(data)
+    
+    #Definimos los distintos sistemas de recomendación
+    
+    if (vAlgorithm=="POPULAR"){
+      recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "POPULAR")
+    }else if(vAlgorithm=="UBCF"){
+      recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "UBCF", param = list(nn = 5))
+    }else if(vAlgorithm=="IBCF"){
+      recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "IBCF", param = list(k = 10))
+    }
+    
+    #Predecimos las Top-10 recomendaciones
+    recommendations <- predict(recomender, data[pos], n=vN)
+    
+    
+    #Visualización de recomendaciones
+    #as(recommendations, "list")
+    lista<-list(recommendations,data)
   
-  #Reducimos la dispersión de la matriz
-  data<-afinarMatriz(data,5,2)
-  #usuario<-paste0("@",vUser)
-  
-  pos<-which(rownames(data) ==vUser, arr.ind = T)
-  lim<-nrow(data)
-  
-  #Definimos los distintos sistemas de recomendación
-  
-  if (vAlgorithm=="POPULAR"){
-    recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "POPULAR")
-  }else if(vAlgorithm=="UBCF"){
-    recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "UBCF", param = list(nn = 5))
-  }else if(vAlgorithm=="IBCF"){
-    recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "IBCF", param = list(k = 10))
-  }
-  
-  #Predecimos las Top-10 recomendaciones
-  recommendations <- predict(recomender, data[pos], n=vN)
-  
-  
-  #Visualización de recomendaciones
-  #as(recommendations, "list")
-  lista<-list(recommendations,data)
+  }else{ lista=FALSE}
   
   #Devolvemos las recomendaciones y la matriz afinada
   return(lista)
@@ -44,6 +48,8 @@ evalueAlgorithmsTagsdb<-function(vUser, vType, vK, vAlgorithm){
   if (vType=="Binaria"){
     
     fileName<-paste0("rb_",vUser,".RDa")
+    
+    #Leemos el fichero de datos
     data<-readRDS(fileName)
     
     #Reducimos la dispersión de la matriz
@@ -116,6 +122,9 @@ evalueAlgorithmsTagsdb<-function(vUser, vType, vK, vAlgorithm){
   
   #Lista de resultados de las evaluaciones
   list_results <- evaluate(x = eval_sets, method = models_to_evaluate, n = n_recommendations)
+  
+
+  #Devolvemos los resultados en una lista
   return(list_results)
 }
 
@@ -194,38 +203,43 @@ recomenUsersdb<-function(vUser, vAlgorithm, vN){
   
   
   fileName<-paste0("rb_follow_",vUser,".RDa")
-
-  data<-readRDS(fileName)
   
-  #Eliminamos el caracter del usuario para poder trabajar con la matriz
-  vUser<-substring(vUser,2)
+  if (file.exists(fileName)){
+    
+    data<-readRDS(fileName)
+    
+    #Eliminamos el caracter del usuario para poder trabajar con la matriz
+    vUser<-substring(vUser,2)
+    
+    #Reducimos la dispersión de la matriz
+    data<-afinarMatriz(data,20,10)
+    
+    #Buscamos la posición del usuario en la matriz
+    pos<-which(rownames(data) ==vUser, arr.ind = T)
+    lim<-nrow(data)
+    
+    #Definimos los distintos sistemas de recomendación
+    
+    if (vAlgorithm=="POPULAR"){
+      recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "POPULAR")
+    }else if(vAlgorithm=="UBCF"){
+      #recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "UBCF", param = list(nn = 5))
+      recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "UBCF")
+    }else if(vAlgorithm=="IBCF"){
+      #recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "IBCF", param = list(k = 10))
+      recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "IBCF")
+    }
+    
+    #Predecimos las Top-10 recomendaciones
+    recommendations <- predict(recomender, data[pos], n=vN)
+    
+    
+    #Visualización de recomendaciones
+    # as(recommendations, "list")
+    lista<-list(recommendations,data)
   
-  #Reducimos la dispersión de la matriz
-  data<-afinarMatriz(data,20,10)
+  }else{lista=FALSE}
   
-  #Buscamos la posición del usuario en la matriz
-  pos<-which(rownames(data) ==vUser, arr.ind = T)
-  lim<-nrow(data)
-  
-  #Definimos los distintos sistemas de recomendación
-  
-  if (vAlgorithm=="POPULAR"){
-    recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "POPULAR")
-  }else if(vAlgorithm=="UBCF"){
-    #recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "UBCF", param = list(nn = 5))
-    recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "UBCF")
-  }else if(vAlgorithm=="IBCF"){
-    #recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "IBCF", param = list(k = 10))
-    recomender <- Recommender(data[c(1:(pos-1),(pos+1):lim)], method = "IBCF")
-  }
-  
-  #Predecimos las Top-10 recomendaciones
-  recommendations <- predict(recomender, data[pos], n=vN)
-  
-  
-  #Visualización de recomendaciones
-  # as(recommendations, "list")
-  lista<-list(recommendations,data)
   #Devolvemos las recomendaciones
   return(lista)
   

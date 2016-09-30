@@ -191,8 +191,11 @@ generadorMatricesUsers<-function(vUser){
   friends<-user$getFriends()
   friends<-twListToDF(friends)
   friends<-friends[order(friends$followersCount, decreasing=TRUE),]
-  friends<-friends[1:100,c("screenName","followersCount")]
-  
+  if (nrow(friends)>100){
+    friends<-friends[1:100,c("screenName","followersCount")]
+  }else{
+    friends<-friends[1:nrow(friends),c("screenName","followersCount")]
+  }
   #Reordenamos los indices
   rownames(friends) <- 1:nrow(friends)
   

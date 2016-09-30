@@ -23,8 +23,8 @@ shinyUI(fluidPage(
   shinyjs::useShinyjs(),
   shinyjs::extendShinyjs(text = "shinyjs.refresh = function() { location.reload(); }"),
   navbarMenu(  
-    actionButton("stop", label="Quit", icon = icon("circle-o-notch")),
-    actionButton("refresh", label="Refresh", icon = icon("fa fa-refresh"))
+    actionButton("stop", label="Salir", icon = icon("circle-o-notch")),
+    actionButton("refresh", label="Refrescar", icon = icon("fa fa-refresh"))
   ), 
   
   

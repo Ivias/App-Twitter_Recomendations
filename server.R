@@ -20,8 +20,13 @@ shinyServer(function(input, output, session) {
 
       for (i in 1:n) {
         dat <- rbind(dat, data.frame(x = rnorm(1), y = rnorm(1)))
-        incProgress(1/n, detail = paste("resultados %", i))
-
+        
+        if (input$analisisType=="Hashtags"){
+          incProgress(1/n, detail = paste("resultados %", i, ". Aprox. 4.5h"))
+        }else{
+          incProgress(1/n, detail = paste("resultados %", i, ". Aprox. 24h"))
+        }
+        
         #Paramos el progreso hasta que devuelva resultados la consulta
         if(i==50){
 
@@ -31,21 +36,7 @@ shinyServer(function(input, output, session) {
               output$textoSalida<-renderText({"Tiempo aprox. proceso 6h.."})
               
               
-              # try.generadorMatricesTags = function(x)
-              # {
-              #   y = "Problema de conectividad, revisar consola para ver el detalle"
-              #   try_error = tryCatch(generadorMatricesTags(x), error=function(e) e)
-              #   if (!inherits(try_error, "error"))
-              #     y = generadorMatricesTags(x)
-              #   
-              #   print(y)
-              #   
-              #   return(y)
-              # }
-              # 
-              
               #Ejecutamos las instrucciones
-              #listaMatrices<-try.generadorMatricesTags(input$usuarioAnalisis)
               listaMatrices<-generadorMatricesTags(input$usuarioAnalisis)
 
               matrizBinariaTags<-listaMatrices[[1]]
@@ -177,27 +168,35 @@ shinyServer(function(input, output, session) {
           if (input$algoritmo!="TODOS"){ 
             if (input$recotipo=="Hashtags"){
               recoTags<-recomenTagsdb(input$usuario, input$tipoMatriz, input$algoritmo, input$n)
-              recomendacionesTags<-recoTags[[1]]
-              matrizTags<-recoTags[[2]]
-              rep1<-formarTabla(recomendacionesTags,paste0("Hashtags (",input$algoritmo,")"))
-              
+              if(length(recoTags)==2){
+                recomendacionesTags<-recoTags[[1]]
+                matrizTags<-recoTags[[2]]
+                rep1<-formarTabla(recomendacionesTags,paste0("Hashtags (",input$algoritmo,")"))
+              }
             } else if(input$recotipo=="Usuarios"){
               recoUsers<-recomenUsersdb(input$usuario, input$algoritmo, input$n)
-              recomendacionesUsers<-recoUsers[[1]]
-              matrizUsers<-recoUsers[[2]]
-              rep2<-formarTabla(recomendacionesUsers,paste0("Usuarios (",input$algoritmo,")"))
-              
+              if(length(recoUsers)==2){
+                recomendacionesUsers<-recoUsers[[1]]
+                matrizUsers<-recoUsers[[2]]
+                rep2<-formarTabla(recomendacionesUsers,paste0("Usuarios (",input$algoritmo,")"))
+              }
             }else if(input$recotipo=="Ambos"){
+              
+              
               recoTags<-recomenTagsdb(input$usuario, input$tipoMatriz, input$algoritmo, input$n)
-              recomendacionesTags<-recoTags[[1]]
-              matrizTags<-recoTags[[2]]
-              rep1<-formarTabla(recomendacionesTags,paste0("Hashtags (",input$algoritmo,")"))
-              
               recoUsers<-recomenUsersdb(input$usuario, input$algoritmo, input$n)
-              recomendacionesUsers<-recoUsers[[1]]
-              matrizUsers<-recoUsers[[2]]
-              rep2<-formarTabla(recomendacionesUsers,paste0("Usuarios (",input$algoritmo,")"))
               
+              if(length(recoTags)==2 && length(recoUsers)==2){
+                #Datos para recomendar hashtags
+                recomendacionesTags<-recoTags[[1]]
+                matrizTags<-recoTags[[2]]
+                rep1<-formarTabla(recomendacionesTags,paste0("Hashtags (",input$algoritmo,")"))
+                
+                #Datos para recomendar Usuarios
+                recomendacionesUsers<-recoUsers[[1]]
+                matrizUsers<-recoUsers[[2]]
+                rep2<-formarTabla(recomendacionesUsers,paste0("Usuarios (",input$algoritmo,")"))
+              }
             }
           }
          
@@ -211,6 +210,7 @@ shinyServer(function(input, output, session) {
     #Presentamos las gráficas
     if (input$algoritmo!="TODOS"){
       if (input$recotipo=="Ambos"){
+        if(length(recoTags)==2 && length(recoUsers)==2){
           output$tabla1<-renderTable({as(rep1,"matrix")})
           output$tabla2<-renderTable({as(rep2,"matrix")})
           output$textoEtiq5<-renderText(usuarioMostrar)
@@ -221,21 +221,32 @@ shinyServer(function(input, output, session) {
           output$textoError<-renderText("")
           output$textoEtiq1<-renderText(usuarioMostrar)
           output$textoEtiq2<-renderText(usuarioMostrar)
+        }else{
+          output$textoError<-renderText(paste0("No se encuentra algunos de los ficheros de recomendaciones del usuario ",usuarioMostrar,". Realizar análisis previo."))
+        }
       }else if(input$recotipo=="Hashtags"){
-          output$tabla1<-renderTable({as(rep1,"matrix")})
-          output$textoEtiq5<-renderText(usuarioMostrar)
-          output$plot1<-renderPlot({image(matrizTags, main = "Dispersión de la Matriz(Hashtags) afinada")})
-          output$textoSalida<-renderText("Recomendaciones encontradas.")
-          output$textoError<-renderText("")
-          output$textoEtiq1<-renderText(usuarioMostrar)
+        if(length(recoTags)==2){
+            output$tabla1<-renderTable({as(rep1,"matrix")})
+            output$textoEtiq5<-renderText(usuarioMostrar)
+            output$plot1<-renderPlot({image(matrizTags, main = "Dispersión de la Matriz(Hashtags) afinada")})
+            output$textoSalida<-renderText("Recomendaciones encontradas.")
+            output$textoError<-renderText("")
+            output$textoEtiq1<-renderText(usuarioMostrar)
+        }else{
+          output$textoError<-renderText(paste0("No se encuentra el fichero de usuario ",usuarioMostrar,", para la recomendación de #hashtags. Realizar análisis previo."))
+        }
       }else if(input$recotipo=="Usuarios"){
-         output$tabla2<-renderTable({as(rep2,"matrix")}) 
-         output$textoEtiq6<-renderText(usuarioMostrar)
-         output$plot2<-renderPlot({image(matrizUsers, main = "Dispersión de la Matriz(Usuarios) afinada")})
-         output$textoSalida<-renderText("Recomendaciones encontradas.")
-         output$textoError<-renderText("")
-         output$textoEtiq2<-renderText(usuarioMostrar)
-         }
+        if(length(recoUsers)==2){
+           output$tabla2<-renderTable({as(rep2,"matrix")}) 
+           output$textoEtiq6<-renderText(usuarioMostrar)
+           output$plot2<-renderPlot({image(matrizUsers, main = "Dispersión de la Matriz(Usuarios) afinada")})
+           output$textoSalida<-renderText("Recomendaciones encontradas.")
+           output$textoError<-renderText("")
+           output$textoEtiq2<-renderText(usuarioMostrar)
+        }else{
+          output$textoError<-renderText(paste0("No se encuentra el fichero de usuario ",usuarioMostrar,",para la recomendación de @usuarios. Realizar análisis previo."))
+        }
+       }
       }else{
          
          output$textoError<-renderText("La opción de algoritmo <TODOS> sólo se usa para evaluación, seleccione otro algoritmo.")

@@ -1,4 +1,8 @@
 followersGetFrame<-function(frame,user0){
+  
+  print(paste0("El frame de friends (grupo B) contiene ",nrow(frame)," usuarios"))
+  
+  #Loop
   for (i in 1:nrow(frame)){#nrow(frame)
    if(i!=1){ Sys.sleep(50)}
     nombre<-frame$followee[i]
@@ -26,7 +30,9 @@ followersGetFrame<-function(frame,user0){
 FolloweeGetFrame<-function(frame,user0){
   #Vector de control de nombres
   vector<-c()
-  for (i in 101:1100){#de 101 hasta 1100
+  print(paste0("Obtenemos los followees(grupo D) sobre un dataframe (B+C) de ",nrow(frame)," usuarios"))
+  #Loop
+  for (i in 101:nrow(frame)){#de 101 hasta 1100
     if((i-100)%%40==0){Sys.sleep(300)}
     if(i!=101){ Sys.sleep(80)}
       
@@ -43,10 +49,11 @@ FolloweeGetFrame<-function(frame,user0){
     
     usuario<-try.getUser(nombre)
     #Comprobamos que el usuario no es NA tambien
-    if (is.na(match(nombre,vector)) && !is.na(usuario)){
+   
+    if (is.na(match(nombre,vector)) && !is.na(usuario$screenName)){
       vector<-append(vector,nombre) 
     
-      #Comprobamos que no esté protegido y que siga a alguien
+      #Comprobamos que no est? protegido y que siga a alguien
       if(usuario$protected==FALSE && usuario$friendsCount > 0){
         followees<-usuario$getFriends(n=1000)
         followees<-twListToDF(followees)
