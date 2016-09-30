@@ -300,7 +300,7 @@ shinyServer(function(input, output, session) {
       output$textoEtiq3<-renderText(usuarioMostrar)
     
     }else if(input$recotipo=="Usuarios"){
-      output$plot5<-renderPlot({plot(evaluacionUsers, annotate = 1, legend = "bottomright")
+      output$plot5<-renderPlot({plot(evaluacionUsers, annotate = 1, legend = "topright")
         title("ROC curve - Users")})
       output$plot6<-renderPlot({plot(evaluacionUsers, "prec/rec", ylim = c(0,1), annotate = 1, legend = "topright")
         title("Precision/recall - Users")

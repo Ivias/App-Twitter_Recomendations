@@ -32,11 +32,16 @@ FolloweeGetFrame<-function(frame,user0){
   vector<-c()
   print(paste0("Obtenemos los followees(grupo D) sobre un dataframe (B+C) de ",nrow(frame)," usuarios"))
   #Loop
-  for (i in 101:nrow(frame)){#de 101 hasta 1100
-    if((i-100)%%40==0){Sys.sleep(300)}
-    if(i!=101){ Sys.sleep(80)}
+  for (i in 1:nrow(frame)){
+    if(i%%40==0){Sys.sleep(300)}
+    if(i!=1){ Sys.sleep(80)}
       
-    nombre<-frame$follower[i]
+    if (i < 101){
+      nombre<-frame$followee[i]
+    }else{
+      nombre<-frame$follower[i]
+    }
+    
     #Por si acaso da problemas el usuario al hacer getuser(nombre)
     try.getUser = function(x)
     {
